@@ -161,6 +161,9 @@ We will preprocess the dataset to tokenize the prompt column and add the act col
 ```python
 tokenizer.pad_token = tokenizer.eos_token
 
+# Split the dataset into train and test
+split_dataset = dataset["train"].train_test_split(test_size=0.2, seed=42)
+
 def preprocess_data(examples):
     # Combine "act" and "prompt" for better fine-tuning
     input_texts = [f"{examples['act']}:\n{examples['prompt']}" for act, prompt in zip(examples['act'], examples['prompt'])]
@@ -170,10 +173,11 @@ def preprocess_data(examples):
     return inputs
 
 # Tokenize the dataset
-tokenized_dataset = dataset.map(preprocess_data, batched=True, remove_columns=dataset['train'].column_names)
+tokenized_dataset = split_dataset.map(preprocess_data, batched=True, remove_columns=split_dataset['train'].column_names)
 
 # Inspect tokenized dataset
 print(tokenized_dataset['train'][0])
+print(tokenized_dataset['test'][0])
 ```
 
 ## Training:
