@@ -159,6 +159,8 @@ model = AutoModelForCausalLM.from_pretrained("openai-community/gpt2")
 We will preprocess the dataset to tokenize the prompt column and add the act column as metadata.
 
 ```python
+tokenizer.pad_token = tokenizer.eos_token
+
 def preprocess_data(examples):
     # Combine "act" and "prompt" for better fine-tuning
     input_texts = [f"{examples['act']}:\n{examples['prompt']}" for act, prompt in zip(examples['act'], examples['prompt'])]
