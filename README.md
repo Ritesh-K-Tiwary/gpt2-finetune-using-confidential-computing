@@ -232,30 +232,129 @@ trainer.save_model("./fine_tuned_gpt2")
 tokenizer.save_pretrained("./fine_tuned_gpt2")
 ```
 
-# Confidential AI
+# Encryption and Decryption
 
-## Encrypt the Fine-Tuned Model for Confidential AI
-To ensure confidentiality, encrypt the model checkpoints. Use the cryptography library for AES encryption.
+## Install Required Library
+Make sure the cryptography library is installed in your environment:
 
-Encryption Script
+```bash
+pip install cryptography
+```
+
+## Encrypt the Model
+
+This function will encrypt all the files in your model directory.
+
 ```python
-from crypto.cipher import AES
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 import os
 
 def encrypt_model(model_dir, output_dir, key):
+    """
+    Encrypt all files in the model directory and save them to the output directory.
+    Args:
+        model_dir (str): Path to the directory containing the model files.
+        output_dir (str): Path to save encrypted files.
+        key (bytes): AES encryption key (32 bytes for AES-256).
+    """
     os.makedirs(output_dir, exist_ok=True)
+    
     for root, _, files in os.walk(model_dir):
         for file in files:
             input_file = os.path.join(root, file)
             output_file = os.path.join(output_dir, file + ".enc")
-            cipher = AES.new(key, AES.MODE_EAX)
+            
+            # Generate a random Initialization Vector (IV)
+            iv = os.urandom(16)
+            cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+            encryptor = cipher.encryptor()
+
+            # Read the file and encrypt it
             with open(input_file, 'rb') as f:
                 plaintext = f.read()
-            ciphertext, tag = cipher.encrypt_and_digest(plaintext)
-            with open(output_file, 'wb') as f:
-                f.write(cipher.nonce + tag + ciphertext)
 
-# Generate a random 16-byte key for encryption
-key = os.urandom(16)
-encrypt_model("./fine_tuned_gpt2", "./encrypted_model", key)
+            ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+
+            # Save the IV and ciphertext to the output file
+            with open(output_file, 'wb') as f:
+                f.write(iv + ciphertext)
+```
+
+## Decrypt the Model
+This function will decrypt the previously encrypted model files.
+
+```python
+def decrypt_model(encrypted_dir, output_dir, key):
+    """
+    Decrypt all files in the encrypted directory and save them to the output directory.
+    Args:
+        encrypted_dir (str): Path to the directory containing encrypted files.
+        output_dir (str): Path to save decrypted files.
+        key (bytes): AES decryption key (same key used for encryption).
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    
+    for root, _, files in os.walk(encrypted_dir):
+        for file in files:
+            input_file = os.path.join(root, file)
+            output_file = os.path.join(output_dir, file.replace(".enc", ""))
+            
+            with open(input_file, 'rb') as f:
+                # Extract the IV (first 16 bytes)
+                iv = f.read(16)
+                ciphertext = f.read()
+
+            cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+            decryptor = cipher.decryptor()
+
+            # Decrypt the ciphertext
+            plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+
+            with open(output_file, 'wb') as f:
+                f.write(plaintext)
+```
+
+## Generate a Secure Encryption Key
+Generate a 32-byte (256-bit) key for AES encryption:
+
+```python
+# Generate a random 32-byte key for AES-256
+key = os.urandom(32)
+
+# Save the key securely (e.g., write it to a secure storage or display it for manual use)
+print("Encryption Key:", key)
+```
+
+## Encrypt Your Model
+Run the encryption function on your fine-tuned GPT-2 model directory:
+
+```python
+model_directory = "./fine_tuned_gpt2"  # Path to your model files
+encrypted_directory = "./encrypted_model"  # Where encrypted files will be saved
+
+encrypt_model(model_directory, encrypted_directory, key)
+print("Model encrypted successfully!")
+```
+
+## Decrypt Your Model
+Run the decryption function to restore your model:
+
+```python
+decrypted_directory = "./decrypted_model"  # Where decrypted files will be saved
+
+decrypt_model(encrypted_directory, decrypted_directory, key)
+print("Model decrypted successfully!")
+```
+## Verify Your Results
+To verify the decryption process:
+
+Compare the original model files with the decrypted files to ensure they match.
+Try loading the decrypted model using the same code you used to load the original model:
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained(decrypted_directory)
+model = AutoModelForCausalLM.from_pretrained(decrypted_directory)
+print("Decrypted model loaded successfully!")
 ```
