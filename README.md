@@ -231,3 +231,31 @@ After fine-tuning, save the model and tokenizer locally.
 trainer.save_model("./fine_tuned_gpt2")
 tokenizer.save_pretrained("./fine_tuned_gpt2")
 ```
+
+# Confidential AI
+
+## Encrypt the Fine-Tuned Model for Confidential AI
+To ensure confidentiality, encrypt the model checkpoints. Use the cryptography library for AES encryption.
+
+Encryption Script
+```python
+from crypto.cipher import AES
+import os
+
+def encrypt_model(model_dir, output_dir, key):
+    os.makedirs(output_dir, exist_ok=True)
+    for root, _, files in os.walk(model_dir):
+        for file in files:
+            input_file = os.path.join(root, file)
+            output_file = os.path.join(output_dir, file + ".enc")
+            cipher = AES.new(key, AES.MODE_EAX)
+            with open(input_file, 'rb') as f:
+                plaintext = f.read()
+            ciphertext, tag = cipher.encrypt_and_digest(plaintext)
+            with open(output_file, 'wb') as f:
+                f.write(cipher.nonce + tag + ciphertext)
+
+# Generate a random 16-byte key for encryption
+key = os.urandom(16)
+encrypt_model("./fine_tuned_gpt2", "./encrypted_model", key)
+```
