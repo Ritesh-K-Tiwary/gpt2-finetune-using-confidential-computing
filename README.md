@@ -51,18 +51,18 @@ It will launch an execution environment
 # Fine-tune gpt2 model:
 
 model details is as:
- 
+ ```python
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 tokenizer = AutoTokenizer.from_pretrained("openai-community/gpt2")
 model = AutoModelForCausalLM.from_pretrained("openai-community/gpt2")
-
+```
 and dataset details is as:
-
+```python
 from datasets import load_dataset
 
 ds = load_dataset("fka/awesome-chatgpt-prompts")
-
+```
 datasets has 2 columns: act and prompt which is already splitted in train-test.
 
 
