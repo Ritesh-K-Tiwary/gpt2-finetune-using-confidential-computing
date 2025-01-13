@@ -259,23 +259,18 @@ def encrypt_model(model_dir, output_dir, key):
         key (bytes): AES encryption key (32 bytes for AES-256).
     """
     os.makedirs(output_dir, exist_ok=True)
-    
     for root, _, files in os.walk(model_dir):
         for file in files:
             input_file = os.path.join(root, file)
             output_file = os.path.join(output_dir, file + ".enc")
-            
             # Generate a random Initialization Vector (IV)
             iv = os.urandom(16)
             cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
             encryptor = cipher.encryptor()
-
             # Read the file and encrypt it
             with open(input_file, 'rb') as f:
                 plaintext = f.read()
-
             ciphertext = encryptor.update(plaintext) + encryptor.finalize()
-
             # Save the IV and ciphertext to the output file
             with open(output_file, 'wb') as f:
                 f.write(iv + ciphertext)
@@ -294,23 +289,18 @@ def decrypt_model(encrypted_dir, output_dir, key):
         key (bytes): AES decryption key (same key used for encryption).
     """
     os.makedirs(output_dir, exist_ok=True)
-    
     for root, _, files in os.walk(encrypted_dir):
         for file in files:
             input_file = os.path.join(root, file)
             output_file = os.path.join(output_dir, file.replace(".enc", ""))
-            
             with open(input_file, 'rb') as f:
                 # Extract the IV (first 16 bytes)
                 iv = f.read(16)
                 ciphertext = f.read()
-
             cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
             decryptor = cipher.decryptor()
-
             # Decrypt the ciphertext
             plaintext = decryptor.update(ciphertext) + decryptor.finalize()
-
             with open(output_file, 'wb') as f:
                 f.write(plaintext)
 ```
