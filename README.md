@@ -8,43 +8,42 @@ Start with setting up the Google Cloud Confidential VM
 
 ## Step 1: Enable Required APIs
 Open Google Cloud Console:
+- Navigate to the Google Cloud Console.
 
-Navigate to the Google Cloud Console.
 Enable APIs:
-
-Go to APIs & Services > Library.
-Enable the following APIs:
-Compute Engine API
-Cloud Storage API
+- Go to APIs & Services > Library.
+- Enable the following APIs:
+- - Compute Engine API
+- - Cloud Storage API
 
 ## Step 2: Create a Confidential VM
 Navigate to Compute Engine:
+- Go to Compute Engine > VM Instances in the Google Cloud Console.
 
-Go to Compute Engine > VM Instances in the Google Cloud Console.
 Create a New Instance:
+- Click Create Instance.
+- Under Machine Configuration, select:
+- - Series: N2D
+- - Machine Type: n2d-standard-4 (or higher, depending on your requirements)
+- - Check Confidential Computing.
+- - Select AMD SEV to enable Confidential VM.
+- Choose the Operating System:
+- - Under Boot Disk, click Change.
+- - Select Ubuntu 20.04 LTS or Ubuntu 22.04 LTS.
 
-Click Create Instance.
-Under Machine Configuration, select:
-Series: N2D
-Machine Type: n2d-standard-4 (or higher, depending on your requirements)
-Check Confidential Computing.
-Select AMD SEV to enable Confidential VM.
-Choose the Operating System:
-
-Under Boot Disk, click Change.
-Select Ubuntu 20.04 LTS or Ubuntu 22.04 LTS.
 Configure Firewall:
+- Under Firewall, check both:
+- - Allow HTTP traffic
+- - Allow HTTPS traffic
 
-Under Firewall, check both:
-Allow HTTP traffic
-Allow HTTPS traffic
 Create the VM:
 
 Click Create to launch your Confidential VM.
 
 ## Step 3: Connect to Your VM
-Go to Compute Engine > VM Instances.
-Find your instance and click SSH to connect to it.
+
+- Go to Compute Engine > VM Instances.
+- Find your instance and click SSH to connect to it.
 
 It will launch an execution environment
 
@@ -65,8 +64,8 @@ ds = load_dataset("fka/awesome-chatgpt-prompts")
 ```
 datasets has 2 columns: act and prompt which is already splitted in train-test.
 
-
-coding steps:
+<details>
+<summary><b>Some Disc Management Tools</b></summary>
 
 ### Check Disk Usage
 
@@ -107,6 +106,8 @@ sudo snap remove lxd
 sudo snap remove google-cloud-cli
 ```
 
+</details>
+
 ## Create a New Python Virtual Environment
 
 Install venv (if not already installed)
@@ -121,18 +122,18 @@ python3 -m venv gpt2_env
 source gpt2_env/bin/activate
 ```
 
-Upgrade Pip
-Once the virtual environment is activated, upgrade pip to the latest version:
-
-```bash
-pip install --upgrade pip
-```
-
 ```bash
 sudo apt update
 sudo apt upgrade -y
 sudo apt install -y python3-pip git build-essential
 pip3 install torch transformers cryptography datasets accelerate
+```
+
+**Note: Upgrade Pip**
+Once the virtual environment is activated, upgrade pip to the latest version:
+
+```bash
+pip install --upgrade pip
 ```
 # Finetuning GPT-2 Model
 
